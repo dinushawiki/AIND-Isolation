@@ -5,6 +5,7 @@ and include the results in your report.
 import random
 
 
+
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
@@ -35,10 +36,10 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    return aggressive_move_score(game, player)
 
 
-def custom_score_2(game, player):
+def aggressive_move_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -61,10 +62,19 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    my_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    return float(my_moves - (2*opponent_moves))
 
 
-def custom_score_3(game, player):
+def defensive_move_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -87,8 +97,16 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
 
+    if game.is_winner(player):
+        return float("inf")
+
+    my_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    return (2 * my_moves - opponent_moves)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -211,10 +229,33 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
+            
+        if depth == 0:
+            return self.score(game, self), game.get_player_location(self)
+        
+        mm_score = float('-inf') if game.active_player else float('inf')
+        mm_move = (-1, -1)
+        player = self if game.active_player  else game.get_opponent(self)
+        possible_moves = game.get_legal_moves(player)
+        
+        print("next")
+        for move in possible_moves:
+            next_step = game.forecast_move(move)
+            score, _move = self.minimax(next_step, depth - 1)
+            if game.active_player:
+                if score >= mm_score:
+                    mm_score = score
+                    mm_score = move
+                    
+            print(next_step.to_string())
+            print(score, _move)
+            print(next_step.get_legal_moves(player))
+            print(next_step.get_legal_moves(game.get_opponent(self)))
+    
+        return(mm_score,mm_move)
+  
 
         # TODO: finish this function!
-        raise NotImplementedError
-
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
