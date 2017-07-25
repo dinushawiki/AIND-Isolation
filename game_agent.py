@@ -233,25 +233,38 @@ class MinimaxPlayer(IsolationPlayer):
         if depth == 0:
             return self.score(game, self), game.get_player_location(self)
         
-        mm_score = float('-inf') if game.active_player else float('inf')
         mm_move = (-1, -1)
-        player = self if game.active_player  else game.get_opponent(self)
+        player = None
+        mm_score = None
+        
+        if game.active_player == self:
+            player = self
+            mm_score = float('-inf')
+        else:
+            player = game.get_opponent(self)
+            mm_score = float('inf')
+            
         possible_moves = game.get_legal_moves(player)
         
-        print("next")
+#        print("next")
+#        print(possible_moves)
         for move in possible_moves:
             next_step = game.forecast_move(move)
+#            print(next_step.to_string())
+#            print(next_step.get_legal_moves(player))
+#            print(next_step.get_legal_moves(game.get_opponent(player)))
+#            print(mm_score,mm_move)
             score, _move = self.minimax(next_step, depth - 1)
-            if game.active_player:
+#            print(score)
+            if game.active_player == self:
                 if score >= mm_score:
                     mm_score = score
-                    mm_score = move
-                    
-            print(next_step.to_string())
-            print(score, _move)
-            print(next_step.get_legal_moves(player))
-            print(next_step.get_legal_moves(game.get_opponent(self)))
-    
+                    mm_move = move
+            else:
+                if score <= mm_score:
+                    mm_score = score
+                    mm_move = move
+            print(mm_score,mm_move)
         return(mm_score,mm_move)
   
 
@@ -296,7 +309,22 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
 
         # TODO: finish this function!
-        raise NotImplementedError
+        best_move = (-1, -1)
+        
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            return self.alphabeta(game, self.search_depth)
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed        
+        
+#        for i in range(1, 1000):
+#            try:
+#                best_move = self.alphabeta(game, self.search_depth)
+#            except SearchTimeout:
+#                break
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -347,4 +375,39 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        if depth == 0:
+            return self.score(game, self), game.get_player_location(self)
+        
+        mm_move = (-1, -1)
+        player = None
+        mm_score = None
+        
+        if game.active_player == self:
+            player = self
+            mm_score = float('-inf')
+        else:
+            player = game.get_opponent(self)
+            mm_score = float('inf')
+            
+        possible_moves = game.get_legal_moves(player)
+        
+        for move in possible_moves:
+            next_step = game.forecast_move(move)
+            score, _move = self.alphabeta(next_step, depth - 1,alpha,beta)
+            
+            if game.active_player == self:
+                if score >= mm_score:
+                    mm_score = score
+                    mm_move = move
+                if mm_score >= beta:
+                    return(mm_score,mm_move)
+                alpha = max(mm_score, alpha)
+            else:
+                if score <= mm_score:
+                    mm_score = score
+                    mm_move = move
+                if mm_score <= alpha:
+                    return(mm_score,mm_move)
+                beta = min(mm_score, beta)
+                
+        return(mm_score,mm_move)
