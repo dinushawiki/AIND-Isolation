@@ -10,7 +10,9 @@ import game_agent
 
 from importlib import reload
 
+
 class IsolationTest(unittest.TestCase):
+    """Unit tests for isolation agents"""
 
     def setUp(self):
         reload(game_agent)
@@ -23,7 +25,7 @@ class IsolationTest(unittest.TestCase):
 
         player1 = "Player1"
         player2 = "Player2"
-        p1_location = (2, 1)
+        p1_location = (0, 0)
         p2_location = (1, 1)  # top left corner
         game = isolation.Board(player1, player2)
         game.apply_move(p1_location)
@@ -41,8 +43,8 @@ class IsolationTest(unittest.TestCase):
     def test_minimax_interface(self):
         
         h, w = 7, 7  # board size
-        search_depth = 2
-        p1_location = (2, 1)
+        search_depth = 8
+        p1_location = (0, 0)
         p2_location = (1, 1)  # top left corner
         
       
@@ -55,17 +57,27 @@ class IsolationTest(unittest.TestCase):
         # place two "players" on the board at arbitrary (but fixed) locations
         board.apply_move(p1_location)
         board.apply_move(p2_location)
-
+        print(board.to_string())
         
         best_move = agentUT.get_move(board,time_left=lambda: 99)
         print(best_move)
+#        
+#        for move in board.get_legal_moves():
+#            next_state = board.forecast_move(move)
+#            v, _ = agentUT.minimax(next_state, test_depth)
+#
+#            self.assertTrue(type(v) == float,
+#                            ("Minimax function should return a floating " +
+#                             "point value approximating the score for the " +
+#                             "branch being searched."))  
+            
 
     def test_alphabeta_interface(self):
         """ Test CustomPlayer.alphabeta interface with simple input """
-        h, w = 9, 9  # board size
+        h, w = 7, 7  # board size
         search_depth = 2
-        starting_location = (2, 1)
-        adversary_location = (1, 1)  # top left corner
+        starting_location = (2, 6)
+        adversary_location = (0, 0)  # top left corner
         
         # create a player agent & a game board
         agentUT = game_agent.AlphaBetaPlayer(
@@ -79,7 +91,7 @@ class IsolationTest(unittest.TestCase):
         print(board.to_string())
         
         best_move = agentUT.get_move(board,time_left=lambda: 99)
-        print(best_move)
+        print(best_move)  
 
 
 if __name__ == '__main__':
